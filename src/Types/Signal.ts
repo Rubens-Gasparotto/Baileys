@@ -1,4 +1,4 @@
-import { proto } from '../../WAProto'
+import { proto } from '../../WAProto/index.js'
 import type { LIDMappingStore } from '../Signal/lid-mapping'
 
 type DecryptGroupSignalOpts = {

@@ -1,8 +1,9 @@
+/* @ts-ignore */
 import * as libsignal from 'libsignal'
 /* @ts-ignore */
 import { LRUCache } from 'lru-cache'
 import type { SignalAuthState, SignalKeyStoreWithTransaction } from '../Types'
-import { SignalRepository } from '../Types/Signal'
+import type { SignalRepository } from '../Types/Signal'
 import { generateSignalPubKey } from '../Utils'
 import { jidDecode } from '../WABinary'
 import type { SenderKeyStore } from './Group/group_cipher'
@@ -279,7 +280,8 @@ function signalStorage({ creds, keys }: SignalAuthState, lidMapping: LIDMappingS
 
 			return null
 		},
-		storeSession: async (id: string, session: libsignal.SessionRecord) => {
+		// TODO: Replace with libsignal.SessionRecord when type exports are added to libsignal
+		storeSession: async (id: string, session: any) => {
 			await keys.set({ session: { [id]: session.serialize() } })
 		},
 		isTrustedIdentity: () => {
