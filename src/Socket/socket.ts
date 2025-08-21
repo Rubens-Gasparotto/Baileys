@@ -351,7 +351,7 @@ export const makeSocket = (config: SocketConfig) => {
 		if (!ws.isClosed && !ws.isClosing) {
 			try {
 				ws.close()
-			} catch {}
+			} catch { }
 		}
 
 		ev.emit('connection.update', {
@@ -389,36 +389,36 @@ export const makeSocket = (config: SocketConfig) => {
 	}
 
 	const startKeepAliveRequest = () =>
-		(keepAliveReq = setInterval(() => {
-			if (!lastDateRecv) {
-				lastDateRecv = new Date()
-			}
+	(keepAliveReq = setInterval(() => {
+		if (!lastDateRecv) {
+			lastDateRecv = new Date()
+		}
 
-			const diff = Date.now() - lastDateRecv.getTime()
-			/*
-				check if it's been a suspicious amount of time since the server responded with our last seen
-				it could be that the network is down
-			*/
-			if (diff > keepAliveIntervalMs + 5000) {
-				end(new Boom('Connection was lost', { statusCode: DisconnectReason.connectionLost }))
-			} else if (ws.isOpen) {
-				// if its all good, send a keep alive request
-				query({
-					tag: 'iq',
-					attrs: {
-						id: generateMessageTag(),
-						to: S_WHATSAPP_NET,
-						type: 'get',
-						xmlns: 'w:p'
-					},
-					content: [{ tag: 'ping', attrs: {} }]
-				}).catch(err => {
-					logger.error({ trace: err.stack }, 'error in sending keep alive')
-				})
-			} else {
-				logger.warn('keep alive called when WS not open')
-			}
-		}, keepAliveIntervalMs))
+		const diff = Date.now() - lastDateRecv.getTime()
+		/*
+			check if it's been a suspicious amount of time since the server responded with our last seen
+			it could be that the network is down
+		*/
+		if (diff > keepAliveIntervalMs + 5000) {
+			end(new Boom('Connection was lost', { statusCode: DisconnectReason.connectionLost }))
+		} else if (ws.isOpen) {
+			// if its all good, send a keep alive request
+			query({
+				tag: 'iq',
+				attrs: {
+					id: generateMessageTag(),
+					to: S_WHATSAPP_NET,
+					type: 'get',
+					xmlns: 'w:p'
+				},
+				content: [{ tag: 'ping', attrs: {} }]
+			}).catch(err => {
+				logger.error({ trace: err.stack }, 'error in sending keep alive')
+			})
+		} else {
+			logger.warn('keep alive called when WS not open')
+		}
+	}, keepAliveIntervalMs))
 	/** i have no idea why this exists. pls enlighten me */
 	const sendPassiveIq = (tag: 'passive' | 'active') =>
 		query({
@@ -637,6 +637,25 @@ export const makeSocket = (config: SocketConfig) => {
 		ev.emit('creds.update', { me: { ...authState.creds.me!, lid: node.attrs.lid } })
 
 		ev.emit('connection.update', { connection: 'open' })
+
+		if (node.attrs.lid && authState.creds.me?.id) {
+			const myLID = node.attrs.lid
+			process.nextTick(async () => {
+				try {
+					const myPN = authState.creds.me!.id
+
+					// Store our own LID-PN mapping
+					await signalRepository.storeLIDPNMapping(myLID, myPN)
+
+					// Create LID session for ourselves (whatsmeow pattern)
+					await signalRepository.migrateSession(myPN, myLID)
+
+					logger.info({ myPN, myLID }, 'Own LID session created successfully')
+				} catch (error) {
+					logger.error({ error, lid: myLID }, 'Failed to create own LID session')
+				}
+			})
+		}
 	})
 
 	ws.on('CB:stream:error', (node: BinaryNode) => {
