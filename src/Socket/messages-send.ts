@@ -76,7 +76,7 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 
 	const userDevicesCache =
 		config.userDevicesCache ||
-		new NodeCache<JidWithDevice[]>({
+		new NodeCache({
 			stdTTL: DEFAULT_CACHE_TTLS.USER_DEVICES, // 5 minutes
 			useClones: false
 		})
@@ -261,7 +261,7 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 			// For user JIDs, normalize and prepare for device enumeration
 			jid = jidNormalizedUser(jid)
 			if (useCache) {
-				const devices = userDevicesCache.get(user!) as JidWithDevice[]
+				const devices: JidWithDevice[] = userDevicesCache.get<JidWithDevice[]>(user!)
 				if (devices) {
 					const isLidJid = jid.includes('@lid')
 					const devicesWithWire = devices.map(d => ({

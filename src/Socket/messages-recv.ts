@@ -85,13 +85,13 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 
 	const msgRetryCache =
 		config.msgRetryCounterCache ||
-		new NodeCache<number>({
+		new NodeCache({
 			stdTTL: DEFAULT_CACHE_TTLS.MSG_RETRY, // 1 hour
 			useClones: false
 		})
 	const callOfferCache =
 		config.callOfferCache ||
-		new NodeCache<WACallEvent>({
+		new NodeCache({
 			stdTTL: DEFAULT_CACHE_TTLS.CALL_OFFER, // 5 mins
 			useClones: false
 		})
@@ -989,7 +989,7 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 		status = getCallStatusFromNode(infoChild)
 
 		if (isLidUser(from) && infoChild.tag === 'relaylatency') {
-			const verify = callOfferCache.get(callId)
+			const verify: WACallEvent = callOfferCache.get<WACallEvent>(callId)
 			if (!verify) {
 				status = 'offer'
 				const callLid: WACallEvent = {
@@ -1020,7 +1020,7 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 			callOfferCache.set(call.id, call)
 		}
 
-		const existingCall = callOfferCache.get<WACallEvent>(call.id)
+		const existingCall: WACallEvent = callOfferCache.get<WACallEvent>(call.id)
 
 		// use existing call info to populate this event
 		if (existingCall) {
