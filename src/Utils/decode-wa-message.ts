@@ -250,6 +250,7 @@ export const decryptMessageNode = (
 							case 'msg':
 								const user = isJidUser(sender) ? sender : author
 								const decryptionJid = await getDecryptionJid(user, repository)
+
 								msgBuffer = await repository.decryptMessage({
 									jid: decryptionJid,
 									type: e2eType,

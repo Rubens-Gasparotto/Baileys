@@ -260,8 +260,9 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 
 			// For user JIDs, normalize and prepare for device enumeration
 			jid = jidNormalizedUser(jid)
+
 			if (useCache) {
-				const devices: JidWithDevice[] = userDevicesCache.get<JidWithDevice[]>(user!)
+				const devices = userDevicesCache.get(user!) as JidWithDevice[]
 				if (devices) {
 					const isLidJid = jid.includes('@lid')
 					const devicesWithWire = devices.map(d => ({
@@ -386,6 +387,7 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 					if (jid.includes('@lid')) {
 						logger.debug({ jid }, 'No LID session found, will create new LID session')
 					}
+
 					jidsRequiringFetch.push(jid)
 				}
 			}
@@ -802,6 +804,7 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 
 		const participants: BinaryNode[] = []
 		const destinationJid = !isStatus ? finalJid : statusJid
+
 		const binaryNodeContent: BinaryNode[] = []
 		const devices: DeviceWithWireJid[] = []
 
@@ -1037,7 +1040,7 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 					allJids.push(jid)
 				}
 
-				await assertSessions(allJids, false)
+				await assertSessions([...otherJids, ...meJids], false)
 
 				const [
 					{ nodes: meNodes, shouldIncludeDeviceIdentity: s1 },
@@ -1063,6 +1066,7 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 					binaryNodeContent.push({
 						tag: 'participants',
 						attrs: {},
+
 						content: participants
 					})
 				}
@@ -1078,6 +1082,7 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 				},
 				content: binaryNodeContent
 			}
+
 			// if the participant to send to is explicitly specified (generally retry recp)
 			// ensure the message is only sent to that person
 			// if a retry receipt is sent to everyone -- it'll fail decryption for everyone else who received the msg
