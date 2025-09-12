@@ -11,6 +11,7 @@ import { SenderKeyName } from './Group/sender-key-name'
 import { SenderKeyRecord } from './Group/sender-key-record'
 import { GroupCipher, GroupSessionBuilder, SenderKeyDistributionMessage } from './Group'
 import { LIDMappingStore } from './lid-mapping'
+import { Buffer } from 'buffer'
 
 export function makeLibSignalRepository(
 	auth: SignalAuthState,
@@ -88,7 +89,7 @@ export function makeLibSignalRepository(
 		},
 		async decryptMessage({ jid, type, ciphertext }) {
 			const addr = jidToSignalProtocolAddress(jid)
-			const session = new libsignal.SessionCipher(storage, addr)
+			const session = new libsignal.SessionCipher(storage as any, addr)
 
 			async function doDecrypt() {
 				let result: Buffer
@@ -146,7 +147,7 @@ export function makeLibSignalRepository(
 			}
 
 			const addr = jidToSignalProtocolAddress(encryptionJid)
-			const cipher = new libsignal.SessionCipher(storage, addr)
+			const cipher = new libsignal.SessionCipher(storage as any, addr)
 
 			// Use transaction to ensure atomicity
 			return parsedKeys.transaction(async () => {
@@ -178,7 +179,7 @@ export function makeLibSignalRepository(
 			}, group)
 		},
 		async injectE2ESession({ jid, session }) {
-			const cipher = new libsignal.SessionBuilder(storage, jidToSignalProtocolAddress(jid))
+			const cipher = new libsignal.SessionBuilder(storage as any, jidToSignalProtocolAddress(jid))
 			return parsedKeys.transaction(async () => {
 				await cipher.initOutgoing(session)
 			}, jid)
@@ -297,7 +298,7 @@ const jidToSignalProtocolAddress = (jid: string) => {
 }
 
 const jidToSignalSenderKeyName = (group: string, user: string): SenderKeyName => {
-	return new SenderKeyName(group, jidToSignalProtocolAddress(user))
+	return new SenderKeyName(group, jidToSignalProtocolAddress(user) as any)
 }
 
 function signalStorage(
