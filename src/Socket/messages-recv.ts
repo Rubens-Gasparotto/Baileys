@@ -415,7 +415,8 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 		}
 
 		const key = `${msgId}:${msgKey?.participant}`
-		const retryCount = (await msgRetryCache.get<number>(key)) || 1
+		const retryCountCache = (await msgRetryCache.get<number>(key)) || 1
+		const retryCount: number = retryCountCache as number;
 
 		const { account, signedPreKey, signedIdentityKey: identityKey } = authState.creds
 		const fromJid = node.attrs.from!
