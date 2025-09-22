@@ -868,13 +868,15 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 
 	const willSendMessageAgain = async (id: string, participant: string) => {
 		const key = `${id}:${participant}`
-		const retryCount = (await msgRetryCache.get<number>(key)) || 0
+		const retryCountCache = (await msgRetryCache.get<number>(key)) || 0
+		const retryCount: number = retryCountCache as number;
 		return retryCount < maxMsgRetryCount
 	}
 
 	const updateSendMessageAgainCount = async (id: string, participant: string) => {
 		const key = `${id}:${participant}`
-		const newValue = ((await msgRetryCache.get<number>(key)) || 0) + 1
+		const newValueCache = ((await msgRetryCache.get<number>(key)) || 0) + 1
+		const newValue: number = newValueCache as number;
 		await msgRetryCache.set(key, newValue)
 	}
 
@@ -1330,7 +1332,7 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 			await callOfferCache.set(call.id, call)
 		}
 
-		const existingCall = await callOfferCache.get<WACallEvent>(call.id)
+		const existingCall: WACallEvent = await callOfferCache.get<WACallEvent>(call.id)
 
 		// use existing call info to populate this event
 		if (existingCall) {
