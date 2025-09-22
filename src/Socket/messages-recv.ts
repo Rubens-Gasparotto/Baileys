@@ -875,7 +875,7 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 
 	const updateSendMessageAgainCount = async (id: string, participant: string) => {
 		const key = `${id}:${participant}`
-		const newValueCache = ((await msgRetryCache.get<number>(key)) || 0) + 1
+		const newValueCache = ((await msgRetryCache.get<number>(key)) || 0) as number + 1
 		const newValue: number = newValueCache as number;
 		await msgRetryCache.set(key, newValue)
 	}
@@ -1332,7 +1332,7 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 			await callOfferCache.set(call.id, call)
 		}
 
-		const existingCall: WACallEvent = await callOfferCache.get<WACallEvent>(call.id)
+		const existingCall: WACallEvent = (await callOfferCache.get<WACallEvent>(call.id)) as WACallEvent
 
 		// use existing call info to populate this event
 		if (existingCall) {
