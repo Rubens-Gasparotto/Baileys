@@ -79,7 +79,7 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 
 	const userDevicesCache =
 		config.userDevicesCache ||
-		new NodeCache<JidWithDevice[]>({
+		new NodeCache({
 			stdTTL: DEFAULT_CACHE_TTLS.USER_DEVICES, // 5 minutes
 			useClones: false
 		})
@@ -271,7 +271,7 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 
 		if (useCache && userDevicesCache.mget) {
 			const usersToFetch = jidsWithUser.map(j => j?.user).filter(Boolean) as string[]
-			mgetDevices = await userDevicesCache.mget(usersToFetch)
+			mgetDevices = await userDevicesCache.mget(usersToFetch) as any
 		}
 
 		for (const { jid, user } of jidsWithUser) {
@@ -365,7 +365,7 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 		return deviceResults
 	}
 
-	const assertSessions = async (jids: string[], force: boolean) => {
+	const assertSessions = async (jids: string[], force: boolean = false) => {
 		let didFetchNewSession = false
 		const jidsRequiringFetch: string[] = []
 
