@@ -400,9 +400,10 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 		} else {
 			// Fallback to old system
 			const key = `${msgId}:${msgKey?.participant}`
-			let retryCount = await msgRetryCache.get<number>(key)
-			if (!retryCount || typeof retryCount !== 'number')
-				retryCount = 0
+			let retryCountCache = await msgRetryCache.get<number>(key)
+			if (!retryCountCache || typeof retryCountCache !== 'number')
+				retryCountCache = 0
+			let retryCount: number = retryCountCache;
 			if (retryCount >= maxMsgRetryCount) {
 				logger.debug({ retryCount, msgId }, 'reached retry limit, clearing')
 				msgRetryCache.del(key)
